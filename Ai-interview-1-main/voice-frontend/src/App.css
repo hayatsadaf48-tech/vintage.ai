@@ -1,0 +1,261 @@
+/* =========================================================
+   INTERVIEW.AI - ULTIMATE MODERN THEME (FULL-WIDTH FIX)
+========================================================= */
+
+:root {
+  /* Vibrant Colors & Gradients */
+  --nav-grad: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  --body-bg: radial-gradient(circle at top left, #f8fafc, #e2e8f0);
+  --btn-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  --btn-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --btn-danger: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  --btn-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  
+  /* Glassmorphism & Shadows */
+  --glass: rgba(255, 255, 255, 0.95);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius-lg: 24px;
+  --radius-md: 12px;
+}
+
+/* ---------- Basic Reset ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--body-bg);
+  color: #1e293b;
+  min-height: 100vh;
+  overflow-x: hidden; /* Scrollbar space fix */
+}
+
+/* ---------- Layout Shell (The Magic Fix) ---------- */
+.ai-shell {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar: Full Edge-to-Edge */
+.ai-topbar {
+  width: 100%;
+  background: var(--nav-grad);
+  padding: 1.2rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  color: white;
+}
+
+.ai-userbox .ai-name { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+.ai-userbox .ai-email { font-size: 0.8rem; opacity: 0.8; }
+
+.ai-nav { display: flex; gap: 10px; }
+
+/* Tabs inside Navbar */
+.ai-tab {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.ai-tab.active, .ai-tab:hover {
+  background: white;
+  color: #1e40af;
+}
+
+/* ---------- Main Container ---------- */
+.ai-container {
+  width: 90%;
+  max-width: 1400px;
+  margin: 40px auto;
+}
+
+/* ---------- Universal Cards ---------- */
+.ai-card {
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  margin-bottom: 25px;
+}
+
+/* ---------- Vibrant Buttons ---------- */
+.ai-btn {
+  padding: 10px 24px;
+  border-radius: 50px;
+  border: none;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.ai-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+.ai-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.ai-btn-primary { background: var(--btn-primary); }
+.ai-btn-success { background: var(--btn-success); }
+.ai-btn-danger { background: var(--btn-danger); }
+.ai-btn-warning { background: var(--btn-warning); }
+
+/* ---------- Interview Page Grid ---------- */
+.iv-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
+}
+
+.iv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.iv-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+.iv-label { font-size: 0.7rem; font-weight: 800; color: #64748b; letter-spacing: 1px; display: block; margin-bottom: 8px; }
+
+/* Question Box */
+.iv-qbox {
+  background: #f1f5f9;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border-left: 6px solid #3b82f6;
+  margin: 15px 0;
+}
+
+.iv-qtext { font-size: 1.3rem; font-weight: 700; line-height: 1.4; color: #1e293b; }
+
+/* ---------- Camera & Preview ---------- */
+.cam-box {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #0f172a;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+}
+
+.cam-video { width: 100%; height: 100%; object-fit: cover; }
+.cam-off { color: white; display: flex; align-items: center; justify-content: center; height: 100%; font-weight: 600; }
+
+.iv-preview video, .iv-preview audio {
+  width: 100%;
+  border-radius: var(--radius-md);
+  background: #f1f5f9;
+}
+
+/* ---------- Forms & Inputs ---------- */
+.ai-input, .ai-select, .ai-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  background: white;
+  font-size: 1rem;
+  transition: 0.3s;
+  outline: none;
+}
+
+.ai-input:focus, .ai-select:focus, .ai-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.ai-textarea { min-height: 120px; resize: vertical; }
+
+/* ---------- Voice Picker List ---------- */
+.vp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vp-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-radius: var(--radius-md);
+  transition: 0.2s;
+}
+
+/* ---------- Helpers ---------- */
+.ai-pill {
+  background: #e2e8f0;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.ai-muted { color: #64748b; font-size: 0.9rem; }
+.mt-2 { margin-top: 20px; }
+.text-left { text-align: left; }
+.flex-center { display: flex; justify-content: center; align-items: center; }
+
+/* ---------- Mobile Responsive ---------- */
+@media (max-width: 900px) {
+  .iv-grid { grid-template-columns: 1fr; }
+  .ai-topbar { padding: 1rem 20px; flex-direction: column; gap: 15px; }
+  .ai-container { width: 95%; }
+}
+
+
+/* --- RIGHT SIDE SPACE FIX --- */
+
+/* 1. Base Shell ko poori width do */
+.ai-shell {
+  width: 100vw !important; /* Viewport width */
+  min-height: 100vh;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+}
+
+/* 2. Container ko center karo aur width 95% karo */
+.ai-container {
+  width: 95% !important;
+  max-width: 1600px !important; /* Isse zyada mat failana varna screen se bahar jayega */
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 20px 0 !important;
+}
+
+/* 3. Topbar (Navbar) ko edge-to-edge karo */
+.ai-topbar {
+  width: 100% !important;
+  margin: 0 !important;
+  left: 0 !important;
+}
+
+/* 4. Home page wrap ko poori jagah lene do */
+.home-wrap {
+  width: 100% !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
