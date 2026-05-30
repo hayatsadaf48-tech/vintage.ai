@@ -14,6 +14,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       default: "pending",
     },
+    isPremium: {
+  type: Boolean,
+  default: false,
+},
   },
   { timestamps: true }
 );

@@ -266,7 +266,7 @@ app.post("/api/auth/login", async (req, res) => {
 
 app.get("/api/auth/me", async (req, res) => {
   if (!req.session?.userId) return res.json({ loggedIn: false });
-  const user = await User.findById(req.session.userId).select("name email");
+const user = await User.findById(req.session.userId).select("name email isPremium");
   res.json({ loggedIn: true, user });
 });
 
@@ -346,6 +346,20 @@ app.post("/api/tts", requireAuth, async (req, res) => {
 
 app.post("/api/attempt", requireAuth, async (req, res) => {
   try {
+    const user = await User.findById(req.session.userId).select("isPremium");
+
+    const totalAttempts = await Attempt.countDocuments({
+      userId: req.session.userId,
+    });
+
+    if (!user?.isPremium && totalAttempts >= 3) {
+      return res.status(403).json({
+        success: false,
+        premiumRequired: true,
+        error: "Free limit reached. Please upgrade to Premium.",
+      });
+    }
+
     const {
       question,
       answerText,
@@ -660,6 +674,9 @@ app.post("/api/payment/verify", requireAuth, async (req, res) => {
         status: "paid",
       }
     );
+    await User.findByIdAndUpdate(req.session.userId, {
+  isPremium: true,
+});
 
     res.json({
       success: true,

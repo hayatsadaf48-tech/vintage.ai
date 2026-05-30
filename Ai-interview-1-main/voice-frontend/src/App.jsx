@@ -48,6 +48,16 @@ export default function App() {
     return () => window.removeEventListener("payment-success", handler);
   }, []);
 
+  useEffect(() => {
+  const handler = () => setPage("payment");
+
+  window.addEventListener("open-payment", handler);
+
+  return () => {
+    window.removeEventListener("open-payment", handler);
+  };
+}, []);
+
   function go(to) {
     if ((to === "interview" || to === "attempts" || to === "payment") && !user) {
       setRedirectAfterAuth(to);
