@@ -3,6 +3,7 @@ import Interview from "./Interview";
 import Attempts from "./Attempts";
 import Home from "./Home";
 import Auth from "./Auth";
+import Payment from "./Payment";
 
 const API = import.meta.env.VITE_API_BASE || "";
 
@@ -17,11 +18,9 @@ export default function App() {
   const [checking, setChecking] = useState(true);
   const [user, setUser] = useState(null);
 
-  // pages: home | auth | interview | attempts
   const [page, setPage] = useState("home");
   const [redirectAfterAuth, setRedirectAfterAuth] = useState("home");
 
-  // ✅ auth check on refresh
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -38,11 +37,19 @@ export default function App() {
         if (alive) setChecking(false);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setPage("payment-success");
+    window.addEventListener("payment-success", handler);
+    return () => window.removeEventListener("payment-success", handler);
   }, []);
 
   function go(to) {
-    if ((to === "interview" || to === "attempts") && !user) {
+    if ((to === "interview" || to === "attempts" || to === "payment") && !user) {
       setRedirectAfterAuth(to);
       setPage("auth");
       return;
@@ -66,7 +73,6 @@ export default function App() {
 
   return (
     <div className="ai-shell">
-      {/* ✅ NAVBAR BAHAR NIKAL DIYA - Ab ye 100% width lega */}
       <header className="ai-topbar">
         <div className="ai-userbox">
           <div className="ai-name">{user ? user.name : "Interview.AI"}</div>
@@ -79,20 +85,23 @@ export default function App() {
           <button className={`ai-tab ${page === "home" ? "active" : ""}`} onClick={() => go("home")}>
             Home
           </button>
-          <button
-            className={`ai-tab ${page === "interview" ? "active" : ""}`}
-            onClick={() => go("interview")}
-          >
+
+          <button className={`ai-tab ${page === "interview" ? "active" : ""}`} onClick={() => go("interview")}>
             Start Interview
           </button>
+
           {user && (
-            <button
-              className={`ai-tab ${page === "attempts" ? "active" : ""}`}
-              onClick={() => go("attempts")}
-            >
+            <button className={`ai-tab ${page === "attempts" ? "active" : ""}`} onClick={() => go("attempts")}>
               Attempts
             </button>
           )}
+
+          {user && (
+            <button className={`ai-tab ${page === "payment" ? "active" : ""}`} onClick={() => go("payment")}>
+              Premium
+            </button>
+          )}
+
           {!user ? (
             <button className="ai-btn ai-btn-primary" onClick={() => go("auth")}>
               Login
@@ -105,7 +114,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* ✅ PAGE BODY - Ye container ke andar hi rahega taaki centered dikhe */}
       <div className="ai-container">
         {checking ? (
           <div className="ai-card" style={{ marginTop: 20 }}>Loading...</div>
@@ -115,8 +123,20 @@ export default function App() {
           <Auth apiBase={API} onAuthed={onAuthed} onBack={() => setPage("home")} />
         ) : page === "interview" ? (
           <Interview />
-        ) : (
+        ) : page === "attempts" ? (
           <Attempts />
+        ) : page === "payment" ? (
+          <Payment />
+        ) : page === "payment-success" ? (
+          <div className="ai-card" style={{ marginTop: 20, textAlign: "center" }}>
+            <h1>Payment Successful ✅</h1>
+            <p>Premium Interview Plan Activated.</p>
+            <button className="ai-btn ai-btn-primary" onClick={() => go("interview")}>
+              Start Premium Interview
+            </button>
+          </div>
+        ) : (
+          <Home user={user} onStart={() => go("interview")} onLogin={() => go("auth")} />
         )}
       </div>
     </div>
