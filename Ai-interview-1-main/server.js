@@ -599,24 +599,6 @@ if (isProd) {
     res.sendFile(path.join(FRONTEND_DIST, "index.html"));
   });
 }
-
-/* =========================
-   ✅ Error + API 404
-========================= */
-app.use((err, req, res, next) => {
-  if (err) return res.status(400).json({ error: err.message || "Error" });
-  next();
-});
-
-// API 404 only (SPA fallback already handled in prod)
-app.use((req, res) => {
-  if (req.path.startsWith("/api")) {
-    return res.status(404).json({ error: `Route not found: ${req.method} ${req.path}` });
-  }
-  // non-api in dev
-  return res.status(404).send("Not Found");
-});
-// payment
 /* =========================
    ✅ Payment Routes - Razorpay
 ========================= */
@@ -687,6 +669,25 @@ app.post("/api/payment/verify", requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/* =========================
+   ✅ Error + API 404
+========================= */
+app.use((err, req, res, next) => {
+  if (err) return res.status(400).json({ error: err.message || "Error" });
+  next();
+});
+
+// API 404 only (SPA fallback already handled in prod)
+app.use((req, res) => {
+  if (req.path.startsWith("/api")) {
+    return res.status(404).json({ error: `Route not found: ${req.method} ${req.path}` });
+  }
+  // non-api in dev
+  return res.status(404).send("Not Found");
+});
+
+
 
 /* =========================
    ✅ Server start
