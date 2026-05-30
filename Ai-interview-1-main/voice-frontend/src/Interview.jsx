@@ -214,12 +214,13 @@ export default function Interview() {
   }
 
   async function speak(text) {
-    if (!voiceId) throw new Error("Pehle voice select karo");
-    if (!text || speaking) return;
+  if (!text || speaking) return;
 
-    setSpeaking(true);
+  setSpeaking(true);
 
-    try {
+  try {
+    // First try ElevenLabs
+    if (voiceId) {
       const res = await fetch(`${API}/api/tts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -227,43 +228,54 @@ export default function Interview() {
         body: JSON.stringify({ text, voiceId }),
       });
 
-      if (!res.ok) {
-        const err = await safeJson(res);
-        throw new Error(err.error || "TTS failed");
+      if (res.ok) {
+        const buf = await res.arrayBuffer();
+        const blob = new Blob([buf], { type: "audio/mpeg" });
+        const url = URL.createObjectURL(blob);
+        const a = new Audio(url);
+        a.volume = 1;
+
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const ctx = audioCtxRef.current;
+        await ctx.resume();
+
+        const node = ctx.createMediaElementSource(a);
+        node.connect(ctx.destination);
+
+        if (destRef.current) {
+          node.connect(destRef.current);
+        }
+
+        await new Promise((resolve, reject) => {
+          a.onended = resolve;
+          a.onerror = reject;
+          a.play().catch(reject);
+        });
+
+        node.disconnect();
+        URL.revokeObjectURL(url);
+        return;
       }
-
-      const buf = await res.arrayBuffer();
-      const blob = new Blob([buf], { type: "audio/mpeg" });
-      const url = URL.createObjectURL(blob);
-      const a = new Audio(url);
-      a.volume = 1;
-
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      }
-
-      const ctx = audioCtxRef.current;
-      await ctx.resume();
-
-      const node = ctx.createMediaElementSource(a);
-      node.connect(ctx.destination);
-
-      if (destRef.current) {
-        node.connect(destRef.current);
-      }
-
-      await new Promise((resolve, reject) => {
-        a.onended = resolve;
-        a.onerror = reject;
-        a.play().catch(reject);
-      });
-
-      node.disconnect();
-      URL.revokeObjectURL(url);
-    } finally {
-      setSpeaking(false);
     }
+
+    // Fallback: Browser voice
+    await new Promise((resolve) => {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "en-IN";
+      utter.rate = 0.95;
+      utter.pitch = 1;
+      utter.onend = resolve;
+      utter.onerror = resolve;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    });
+  } finally {
+    setSpeaking(false);
   }
+}
 
   async function startRecording() {
     setResult(null);
@@ -608,7 +620,7 @@ export default function Interview() {
             <button
               className="ai-btn ai-btn-primary"
               onClick={startCurrentQuestion}
-              disabled={!voiceId || speaking || recOn}
+              disabled={speaking || recOn}
             >
               {recOn ? "🔴 Recording..." : "▶ Start Interaction"}
             </button>
