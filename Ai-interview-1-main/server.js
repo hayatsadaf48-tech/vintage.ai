@@ -532,7 +532,7 @@ You are a strict technical interviewer.
 Return ONLY valid JSON in this exact schema:
 
 {
-  "score": 0-10,
+  "score": 0,
   "feedback": "short feedback in Hinglish",
   "what_was_good": ["..."],
   "what_to_improve": ["..."]
@@ -574,8 +574,9 @@ Rules:
       });
     }
 
-    const content = data?.choices?.[0]?.message?.content || "";
-    let parsed;
+  const content = data?.choices?.[0]?.message?.content || "";
+console.log("AI Response:", content);
+let parsed;
 
     try {
       parsed = JSON.parse(content);
