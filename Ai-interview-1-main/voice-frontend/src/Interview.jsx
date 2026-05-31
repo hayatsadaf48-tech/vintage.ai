@@ -555,6 +555,7 @@ export default function Interview() {
 
       if (!saveRes.ok) {
         if (saveData.premiumRequired) {
+          document.body.classList.add("premium-shake");
           alert("🚀 Free limit reached! Please upgrade to Premium.");
           window.dispatchEvent(new CustomEvent("open-payment"));
           return;
