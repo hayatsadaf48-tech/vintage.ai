@@ -84,3 +84,50 @@ button:focus-visible {
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,.3);
 }
+
+
+
+.premium-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
+.premium-modal {
+  width: 420px;
+  max-width: 90%;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 26px;
+  text-align: center;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+  animation: premiumPop 0.35s ease;
+}
+
+.premium-modal h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  color: #111827;
+}
+
+.premium-modal p {
+  margin: 0;
+  font-size: 16px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+@keyframes premiumPop {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
