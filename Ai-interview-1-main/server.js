@@ -532,15 +532,21 @@ You are a strict technical interviewer.
 Return ONLY valid JSON in this exact schema:
 
 {
-  "score": 0 or 1,
+  "score": 0-10,
   "feedback": "short feedback in Hinglish",
   "what_was_good": ["..."],
   "what_to_improve": ["..."]
 }
 
 Rules:
-- score=1 only if answer is correct and sufficiently clear.
-- score=0 if wrong/unclear/partial.
+- Give score from 0 to 10.
+- 0-2 = wrong or irrelevant answer.
+- 3-5 = partially correct but incomplete.
+- 6-7 = mostly correct with minor mistakes.
+- 8-9 = correct and well explained.
+- 10 = perfect interview-ready answer.
+- Give partial marks when the answer contains correct concepts.
+- Do not be overly strict.
 - Keep feedback short and actionable.
 `.trim();
 
@@ -587,7 +593,7 @@ Rules:
 
     res.json({
       success: true,
-      score: parsed.score === 1 ? 1 : 0,
+      score: Number(parsed.score) || 0,
       feedback: parsed.feedback || "",
       what_was_good: parsed.what_was_good || [],
       what_to_improve: parsed.what_to_improve || [],
