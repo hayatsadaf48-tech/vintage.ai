@@ -71,32 +71,25 @@ export default function Interview() {
   const [result, setResult] = useState(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
+const PremiumModal = () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPremiumModal(false);
+      window.dispatchEvent(new CustomEvent("open-payment"));
+    }, 1800);
 
-  const PremiumModal = () => (
-  <div className="premium-modal-overlay">
-    <div className="premium-modal">
-      <h2>🚀 Premium Required</h2>
-      <p>Free limit reached. Upgrade to Premium for unlimited interviews.</p>
+    return () => clearTimeout(timer);
+  }, []);
 
-      <button
-        className="premium-btn"
-        onClick={() => {
-          setShowPremiumModal(false);
-          window.dispatchEvent(new CustomEvent("open-payment"));
-        }}
-      >
-        Upgrade Now
-      </button>
-
-      <button
-        className="close-btn"
-        onClick={() => setShowPremiumModal(false)}
-      >
-        Later
-      </button>
+  return (
+    <div className="premium-modal-overlay">
+      <div className="premium-modal">
+        <h2>🚀 Premium Required</h2>
+        <p>Free limit reached. Redirecting you to Premium upgrade...</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
   useEffect(() => {
     const v = videoRef.current;
@@ -583,9 +576,9 @@ export default function Interview() {
 
       if (!saveRes.ok) {
         if (saveData.premiumRequired) {
-          document.body.classList.add("premium-shake");
+         
          setShowPremiumModal(true);
-          window.dispatchEvent(new CustomEvent("open-payment"));
+          
           return;
         }
 
