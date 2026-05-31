@@ -69,6 +69,34 @@ export default function Interview() {
   const [answerText, setAnswerText] = useState("");
   const [evaluating, setEvaluating] = useState(false);
   const [result, setResult] = useState(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+
+  const PremiumModal = () => (
+  <div className="premium-modal-overlay">
+    <div className="premium-modal">
+      <h2>🚀 Premium Required</h2>
+      <p>Free limit reached. Upgrade to Premium for unlimited interviews.</p>
+
+      <button
+        className="premium-btn"
+        onClick={() => {
+          setShowPremiumModal(false);
+          window.dispatchEvent(new CustomEvent("open-payment"));
+        }}
+      >
+        Upgrade Now
+      </button>
+
+      <button
+        className="close-btn"
+        onClick={() => setShowPremiumModal(false)}
+      >
+        Later
+      </button>
+    </div>
+  </div>
+);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -556,7 +584,7 @@ export default function Interview() {
       if (!saveRes.ok) {
         if (saveData.premiumRequired) {
           document.body.classList.add("premium-shake");
-          alert("🚀 Free limit reached! Please upgrade to Premium.");
+         setShowPremiumModal(true);
           window.dispatchEvent(new CustomEvent("open-payment"));
           return;
         }
@@ -583,6 +611,9 @@ export default function Interview() {
   }
 
   return (
+    
+    <>
+    {showPremiumModal && <PremiumModal />}
     <div className="iv-wrap">
       <div className="ai-card">
         <VoicePicker onSelect={setVoiceId} />
@@ -731,5 +762,6 @@ export default function Interview() {
         </div>
       </div>
     </div>
+     </>
   );
 }
