@@ -352,6 +352,13 @@ app.get("/api/check-limit", requireAuth, async (req, res) => {
     });
 
     const premiumRequired = !user?.isPremium && totalAttempts >= 3;
+        console.log("CHECK LIMIT USER:", {
+      sessionUserId: req.session.userId,
+      isPremium: user?.isPremium,
+      totalAttempts,
+      premiumRequired,
+    });
+
 
     res.json({
       success: true,
