@@ -379,7 +379,7 @@ app.post("/api/attempt", requireAuth, async (req, res) => {
       userId: req.session.userId,
       question,
       answerText: answerText || "",
-      score: score === 1 ? 1 : 0,
+     score: Number(score) || 0,
       feedback: feedback || "",
       voiceId: voiceId || "",
       audioUrl: audioUrl || "",
