@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import jsPDF from "jspdf";
 
 const API = import.meta.env.VITE_API_BASE || "";
 
@@ -57,6 +58,93 @@ export default function Attempts() {
     }
   }
 
+  function downloadReport(a) {
+    const doc = new jsPDF();
+
+    const date = a.createdAt ? new Date(a.createdAt).toLocaleString() : "N/A";
+    const score = a.score ?? "N/A";
+
+    doc.setFontSize(18);
+    doc.text("AI Interview Report", 14, 18);
+
+    doc.setFontSize(11);
+    doc.text(`Date: ${date}`, 14, 30);
+    doc.text(`Score: ${score}/10`, 14, 38);
+    doc.text(`Voice ID: ${a.voiceId || "N/A"}`, 14, 46);
+
+    doc.setFontSize(14);
+    doc.text("Question", 14, 60);
+
+    doc.setFontSize(11);
+    const questionLines = doc.splitTextToSize(a.question || "N/A", 180);
+    doc.text(questionLines, 14, 70);
+
+    let y = 70 + questionLines.length * 7 + 8;
+
+    doc.setFontSize(14);
+    doc.text("Candidate Answer", 14, y);
+    y += 10;
+
+    doc.setFontSize(11);
+    const answerLines = doc.splitTextToSize(a.answerText || "No answer saved", 180);
+    doc.text(answerLines, 14, y);
+
+    y += answerLines.length * 7 + 8;
+
+    if (y > 260) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.text("AI Feedback", 14, y);
+    y += 10;
+
+    doc.setFontSize(11);
+    const feedbackLines = doc.splitTextToSize(a.feedback || "No feedback saved", 180);
+    doc.text(feedbackLines, 14, y);
+
+    y += feedbackLines.length * 7 + 8;
+
+    if (a.what_was_good?.length) {
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text("What Was Good", 14, y);
+      y += 10;
+
+      doc.setFontSize(11);
+      a.what_was_good.forEach((item) => {
+        const lines = doc.splitTextToSize(`- ${item}`, 180);
+        doc.text(lines, 14, y);
+        y += lines.length * 7;
+      });
+    }
+
+    if (a.what_to_improve?.length) {
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text("What To Improve", 14, y);
+      y += 10;
+
+      doc.setFontSize(11);
+      a.what_to_improve.forEach((item) => {
+        const lines = doc.splitTextToSize(`- ${item}`, 180);
+        doc.text(lines, 14, y);
+        y += lines.length * 7;
+      });
+    }
+
+    doc.save(`interview-report-${Date.now()}.pdf`);
+  }
+
   useEffect(() => {
     load();
   }, []);
@@ -107,13 +195,21 @@ export default function Attempts() {
 
                 <div className="at-pillrow">
                   <span className="at-pill">Voice: {a.voiceId || "—"}</span>
-                  <span className="at-pill">Score: {a.score ?? "—"}</span>
+                  <span className="at-pill">Score: {a.score ?? "—"}/10</span>
+
+                  <button
+                    className="ai-btn"
+                    onClick={() => downloadReport(a)}
+                    style={{ marginLeft: "auto" }}
+                  >
+                    Download Report
+                  </button>
+
                   <button
                     className="ai-btn ai-danger"
                     onClick={() => remove(a._id)}
                     disabled={busyId === a._id}
                     title="Delete attempt"
-                    style={{ marginLeft: "auto" }}
                   >
                     {busyId === a._id ? "Deleting..." : "Delete"}
                   </button>
