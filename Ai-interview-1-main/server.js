@@ -525,7 +525,7 @@ app.post("/api/evaluate", requireAuth, async (req, res) => {
       return res.status(500).json({ error: "GROQ_API_KEY missing in .env" });
     }
 
-    const model = process.env.GROQ_MODEL || "llama3-8b-8192";
+    const model = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
     const systemPrompt = `
 You are a strict technical interviewer.
