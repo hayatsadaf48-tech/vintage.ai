@@ -342,6 +342,28 @@ app.post("/api/tts", requireAuth, async (req, res) => {
   }
 });
 
+
+app.get("/api/check-limit", requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.userId).select("isPremium");
+
+    const totalAttempts = await Attempt.countDocuments({
+      userId: req.session.userId,
+    });
+
+    const premiumRequired = !user?.isPremium && totalAttempts >= 3;
+
+    res.json({
+      success: true,
+      premiumRequired,
+      totalAttempts,
+      isPremium: !!user?.isPremium,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 /* ---------- ATTEMPTS ---------- */
 
 app.post("/api/attempt", requireAuth, async (req, res) => {

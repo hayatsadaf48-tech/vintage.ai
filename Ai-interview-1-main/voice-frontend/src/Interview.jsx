@@ -71,25 +71,39 @@ export default function Interview() {
   const [result, setResult] = useState(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
-const PremiumModal = () => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowPremiumModal(false);
-      window.dispatchEvent(new CustomEvent("open-payment"));
-    }, 1800);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="premium-modal-overlay">
-      <div className="premium-modal">
-        <h2>🚀 Premium Required</h2>
-        <p>Free limit reached. Redirecting you to Premium upgrade...</p>
-      </div>
+const PremiumModal = () => (
+  <div className="premium-modal-overlay">
+    <div className="premium-modal">
+      <h2>🚀 Premium Required</h2>
+      <p>Free limit reached. Redirecting you to Premium upgrade...</p>
     </div>
-  );
-};
+  </div>
+);
+
+useEffect(() => {
+  async function checkLimit() {
+    try {
+      const res = await fetch(`${API}/api/check-limit`, {
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (data.premiumRequired) {
+        setShowPremiumModal(true);
+
+        setTimeout(() => {
+          setShowPremiumModal(false);
+          window.dispatchEvent(new CustomEvent("open-payment"));
+        }, 1800);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  checkLimit();
+}, []);
 
   useEffect(() => {
     const v = videoRef.current;
