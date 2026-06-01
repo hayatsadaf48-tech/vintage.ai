@@ -255,25 +255,30 @@ app.post("/api/forgot-password", async (req, res) => {
     user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "AI Interview Platform - Password Reset OTP",
-      html: `
-        <h2>Password Reset Request</h2>
-        <p>Your OTP is:</p>
-        <h1>${otp}</h1>
-        <p>This OTP is valid for 10 minutes.</p>
-      `,
-    });
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: user.email,
+        subject: "AI Interview Platform - Password Reset OTP",
+        html: `
+          <h2>Password Reset Request</h2>
+          <p>Your OTP is:</p>
+          <h1>${otp}</h1>
+          <p>This OTP is valid for 10 minutes.</p>
+        `,
+      });
+    } catch (mailErr) {
+      console.error("EMAIL SEND FAILED");
+      console.error("DEMO OTP:", otp);
+    }
 
     res.json({
       success: true,
-      message: "OTP sent to your email",
+      message: "OTP generated successfully",
     });
   } catch (e) {
     console.error("FORGOT PASSWORD ERROR:", e);
-  res.status(500).json({ error: e.message });
+    res.status(500).json({ error: e.message });
   }
 });
 
