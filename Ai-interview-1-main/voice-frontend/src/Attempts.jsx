@@ -255,17 +255,17 @@ export default function Attempts() {
                 <div className="at-pillrow">
                   <span className="at-pill">Voice: {a.voiceId || "—"}</span>
                   <span className="at-pill">Score: {a.score ?? "—"}/10</span>
-
+                  
                   <button
-                    className="ai-btn"
-                    onClick={() => downloadReport(a)}
-                    style={{ marginLeft: "auto" }}
-                  >
+  className="ai-btn ai-btn-primary"
+  onClick={() => downloadReport(a)}
+>
+
                     Download Report
                   </button>
 
                   <button
-                    className="ai-btn ai-danger"
+                    className="ai-btn ai-btn-danger"
                     onClick={() => remove(a._id)}
                     disabled={busyId === a._id}
                     title="Delete attempt"
