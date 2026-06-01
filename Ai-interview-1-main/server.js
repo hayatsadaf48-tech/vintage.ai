@@ -28,6 +28,9 @@ const app = express();
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -269,7 +272,8 @@ app.post("/api/forgot-password", async (req, res) => {
       message: "OTP sent to your email",
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    console.error("FORGOT PASSWORD ERROR:", e);
+  res.status(500).json({ error: e.message });
   }
 });
 
