@@ -20,9 +20,19 @@ const requireAuth = require("./middleware/auth");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Payment = require("./models/Payment");
+const nodemailer = require("nodemailer");
 
 dotenv.config();
 const app = express();
+
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -219,6 +229,53 @@ app.get("/api/debug/session", (req, res) => {
 
 /* ---------- AUTH ---------- */
 
+
+app.post("/api/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email required" });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.resetOtp = otp;
+    user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "AI Interview Platform - Password Reset OTP",
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 10 minutes.</p>
+      `,
+    });
+
+    res.json({
+      success: true,
+      message: "OTP sent to your email",
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+
+
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -236,6 +293,74 @@ app.post("/api/auth/register", async (req, res) => {
     res.json({
       success: true,
       user: { id: user._id, name: user.name, email: user.email },
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post("/api/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (
+      user.resetOtp !== otp ||
+      !user.resetOtpExpires ||
+      user.resetOtpExpires < new Date()
+    ) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    res.json({
+      success: true,
+      message: "OTP verified",
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post("/api/reset-password", async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ error: "Email, OTP and new password required" });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (
+      user.resetOtp !== otp ||
+      !user.resetOtpExpires ||
+      user.resetOtpExpires < new Date()
+    ) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.resetOtp = undefined;
+    user.resetOtpExpires = undefined;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password reset successfully",
     });
   } catch (e) {
     res.status(500).json({ error: e.message });
