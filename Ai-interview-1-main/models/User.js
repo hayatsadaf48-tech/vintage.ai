@@ -18,6 +18,19 @@ const userSchema = new mongoose.Schema(
 resetOtpExpires: {
   type: Date,
 },
+
+isEmailVerified: {
+  type: Boolean,
+  default: false,
+},
+
+emailVerifyOtp: {
+  type: String,
+},
+
+emailVerifyOtpExpires: {
+  type: Date,
+},
   },
   { timestamps: true }
 );

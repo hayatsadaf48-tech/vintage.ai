@@ -284,26 +284,118 @@ app.post("/api/forgot-password", async (req, res) => {
 
 
 
-
 app.post("/api/auth/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password)
+    const name = String(req.body.name || "").trim();
+    const email = String(req.body.email || "").toLowerCase().trim();
+    const password = String(req.body.password || "");
+
+    if (!name || !email || !password) {
       return res.status(400).json({ error: "All fields required" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
 
     const exists = await User.findOne({ email });
-    if (exists)
+
+    if (exists && exists.isEmailVerified) {
       return res.status(400).json({ error: "Email already registered" });
+    }
 
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, passwordHash });
 
-    req.session.userId = user._id;
+    let user;
+
+    if (exists && !exists.isEmailVerified) {
+      exists.name = name;
+      exists.passwordHash = passwordHash;
+      exists.emailVerifyOtp = otp;
+      exists.emailVerifyOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+      user = await exists.save();
+    } else {
+      user = await User.create({
+        name,
+        email,
+        passwordHash,
+        isEmailVerified: false,
+        emailVerifyOtp: otp,
+        emailVerifyOtpExpires: new Date(Date.now() + 10 * 60 * 1000),
+      });
+    }
+
+    await transporter.sendMail({
+      from: `"AI Interview Platform" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Verify your email - AI Interview Platform",
+      html: `
+        <h2>Email Verification</h2>
+        <p>Your verification OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 10 minutes.</p>
+      `,
+    });
+
     res.json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email },
+      message: "Verification OTP sent to your email",
+      email,
+      needVerification: true,
     });
   } catch (e) {
+    console.error("REGISTER ERROR:", e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post("/api/auth/verify-register-otp", async (req, res) => {
+  try {
+    const email = String(req.body.email || "").toLowerCase().trim();
+    const otp = String(req.body.otp || "").trim();
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found. Please register again." });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({ error: "Email already verified" });
+    }
+
+    if (
+      user.emailVerifyOtp !== otp ||
+      !user.emailVerifyOtpExpires ||
+      user.emailVerifyOtpExpires < new Date()
+    ) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerifyOtp = undefined;
+    user.emailVerifyOtpExpires = undefined;
+
+    await user.save();
+
+    req.session.userId = user._id;
+
+    res.json({
+      success: true,
+      message: "Email verified successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (e) {
+    console.error("VERIFY REGISTER OTP ERROR:", e);
     res.status(500).json({ error: e.message });
   }
 });
@@ -387,7 +479,12 @@ app.post("/api/auth/login", async (req, res) => {
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
-
+    if (!user.isEmailVerified) {
+  return res.status(403).json({
+    error: "Please verify your email before login",
+    needVerification: true,
+  });
+}
     req.session.userId = user._id;
     res.json({
       success: true,
