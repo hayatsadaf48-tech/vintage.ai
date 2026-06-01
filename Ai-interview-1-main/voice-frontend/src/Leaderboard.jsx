@@ -33,14 +33,20 @@ export default function Leaderboard() {
   }, []);
 
   return (
-  <div className="leaderboard-card">
+    <div className="leaderboard-card">
       <div className="iv-header">
         <div>
           <h2 className="iv-title">🏆 Score Leaderboard</h2>
-          <div className="iv-sub">Top candidates based on interview scores.</div>
+          <div className="iv-sub">
+            Top candidates based on interview scores.
+          </div>
         </div>
 
-        <button className="ai-btn" onClick={loadLeaderboard} disabled={loading}>
+        <button
+          className="ai-btn ai-btn-primary"
+          onClick={loadLeaderboard}
+          disabled={loading}
+        >
           {loading ? "Loading..." : "Refresh"}
         </button>
       </div>
@@ -50,15 +56,21 @@ export default function Leaderboard() {
       ) : items.length === 0 ? (
         <div className="ai-muted mt-2">No scores available yet.</div>
       ) : (
-        <div style={{ marginTop: 15 }}>
+        <div className="leader-list">
           {items.map((item, index) => (
             <div key={item.id} className="leader-row">
               <div className="leader-rank">
-                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
+                {index === 0
+                  ? "🥇"
+                  : index === 1
+                  ? "🥈"
+                  : index === 2
+                  ? "🥉"
+                  : `#${index + 1}`}
               </div>
 
               <div className="leader-user">
-                <strong>{item.name}</strong>
+                <strong>{item.name || "User"}</strong>
                 <span>{item.email}</span>
               </div>
 

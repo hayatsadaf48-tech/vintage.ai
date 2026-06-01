@@ -189,3 +189,30 @@ button:focus-visible {
   border-radius: 18px;
   box-shadow: 0 12px 30px rgba(37, 99, 235, 0.3);
 }
+
+.ai-btn {
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.25s;
+}
+
+.ai-btn:hover {
+  transform: translateY(-2px);
+}
+
+.ai-btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: white !important;
+}
+
+.ai-btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white !important;
+}
+
+.ai-btn-secondary {
+  background: #f1f5f9;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1;
+}
