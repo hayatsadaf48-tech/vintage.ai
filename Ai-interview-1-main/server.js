@@ -569,6 +569,37 @@ app.get("/api/attempts", requireAuth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+//
+app.get("/api/dashboard-stats", requireAuth, async (req, res) => {
+  try {
+    const attempts = await Attempt.find({ userId: req.session.userId });
+
+    const totalInterviews = attempts.length;
+    const totalScore = attempts.reduce((sum, a) => sum + (Number(a.score) || 0), 0);
+
+    const averageScore = totalInterviews
+      ? (totalScore / totalInterviews).toFixed(1)
+      : 0;
+
+    const bestScore = totalInterviews
+      ? Math.max(...attempts.map((a) => Number(a.score) || 0))
+      : 0;
+
+    const user = await User.findById(req.session.userId).select("isPremium");
+
+    res.json({
+      success: true,
+      totalInterviews,
+      averageScore,
+      bestScore,
+      isPremium: !!user?.isPremium,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 //Leaderboard
 app.get("/api/leaderboard", requireAuth, async (req, res) => {
   try {
