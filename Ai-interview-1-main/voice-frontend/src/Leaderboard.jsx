@@ -33,7 +33,7 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="ai-card" style={{ marginTop: 20 }}>
+  <div className="leaderboard-card">
       <div className="iv-header">
         <div>
           <h2 className="iv-title">🏆 Score Leaderboard</h2>
