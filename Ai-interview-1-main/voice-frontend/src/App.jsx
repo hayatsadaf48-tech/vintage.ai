@@ -4,6 +4,7 @@ import Attempts from "./Attempts";
 import Home from "./Home";
 import Auth from "./Auth";
 import Payment from "./Payment";
+import Leaderboard from "./Leaderboard";
 
 const API = import.meta.env.VITE_API_BASE || "";
 
@@ -107,6 +108,15 @@ export default function App() {
           )}
 
           {user && (
+  <button
+    className={`ai-tab ${page === "leaderboard" ? "active" : ""}`}
+    onClick={() => go("leaderboard")}
+  >
+    🏆 Leaderboard
+  </button>
+)}
+
+          {user && (
             <button className={`ai-tab ${page === "payment" ? "active" : ""}`} onClick={() => go("payment")}>
               Premium
             </button>
@@ -135,6 +145,8 @@ export default function App() {
           <Interview />
         ) : page === "attempts" ? (
           <Attempts />
+          ) : page === "leaderboard" ? (
+             <Leaderboard />
         ) : page === "payment" ? (
           <Payment />
         ) : page === "payment-success" ? (

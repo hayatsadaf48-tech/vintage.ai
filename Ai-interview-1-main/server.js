@@ -569,6 +569,31 @@ app.get("/api/attempts", requireAuth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+//Leaderboard
+app.get("/api/leaderboard", requireAuth, async (req, res) => {
+  try {
+    const attempts = await Attempt.find({})
+      .sort({ score: -1, createdAt: -1 })
+      .limit(10)
+      .populate("userId", "name email");
+
+    const leaderboard = attempts.map((a) => ({
+      id: a._id,
+      name: a.userId?.name || "User",
+      email: a.userId?.email || "",
+      score: a.score ?? 0,
+      question: a.question || "",
+      createdAt: a.createdAt,
+    }));
+
+    res.json({
+      success: true,
+      leaderboard,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 app.delete("/api/attempt/:id", requireAuth, async (req, res) => {
   try {
