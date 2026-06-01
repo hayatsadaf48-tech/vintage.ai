@@ -37,6 +37,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log("❌ SMTP ERROR:");
+    console.log(error);
+  } else {
+    console.log("✅ SMTP READY");
+  }
+});
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -238,7 +247,9 @@ app.post("/api/forgot-password", async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ error: "Email required" });
+      return res.status(400).json({
+        error: "Email required",
+      });
     }
 
     const user = await User.findOne({
@@ -246,39 +257,68 @@ app.post("/api/forgot-password", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({
+        error: "This email is not registered",
+      });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = Math.floor(
+      100000 + Math.random() * 900000
+    ).toString();
 
     user.resetOtp = otp;
-    user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    user.resetOtpExpires = new Date(
+      Date.now() + 10 * 60 * 1000
+    );
+
     await user.save();
 
     try {
       await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: `"AI Interview Platform" <${process.env.EMAIL_USER}>`,
         to: user.email,
         subject: "AI Interview Platform - Password Reset OTP",
         html: `
-          <h2>Password Reset Request</h2>
-          <p>Your OTP is:</p>
-          <h1>${otp}</h1>
-          <p>This OTP is valid for 10 minutes.</p>
+          <div style="font-family:Arial,sans-serif">
+            <h2>Password Reset Request</h2>
+
+            <p>Your OTP is:</p>
+
+            <h1 style="color:#2563eb;">
+              ${otp}
+            </h1>
+
+            <p>
+              This OTP is valid for 10 minutes.
+            </p>
+          </div>
         `,
       });
+
+      console.log(
+        `✅ Password reset OTP sent to ${user.email}`
+      );
     } catch (mailErr) {
-      console.error("EMAIL SEND FAILED");
-      console.error("DEMO OTP:", otp);
+      console.error("❌ EMAIL SEND FAILED:");
+      console.error(mailErr);
+
+      return res.status(500).json({
+        error:
+          mailErr.message ||
+          "Failed to send OTP email",
+      });
     }
 
     res.json({
       success: true,
-      message: "OTP generated successfully",
+      message: "OTP sent successfully",
     });
   } catch (e) {
     console.error("FORGOT PASSWORD ERROR:", e);
-    res.status(500).json({ error: e.message });
+
+    res.status(500).json({
+      error: e.message,
+    });
   }
 });
 
