@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import VoicePicker from "./VoicePicker";
+import jsPDF from "jspdf";
 
 const API = import.meta.env.VITE_API_BASE || "";
 
@@ -532,6 +533,46 @@ useEffect(() => {
     }
   }
 
+  function downloadFinalReport(report) {
+  const doc = new jsPDF();
+
+  doc.setFontSize(20);
+  doc.text("AI Interview Final Report", 14, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Overall Score: ${report.averageScore}/10`, 14, 35);
+  doc.text(`Status: ${report.status}`, 14, 45);
+  doc.text(`Total Questions: ${report.totalQuestions}`, 14, 55);
+
+  let y = 70;
+
+  report.attempts.forEach((a, i) => {
+    if (y > 260) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFontSize(13);
+    doc.text(`Q${i + 1}: ${a.question}`, 14, y);
+    y += 8;
+
+    doc.setFontSize(11);
+    doc.text(`Score: ${a.score}/10`, 14, y);
+    y += 7;
+
+    const feedbackLines = doc.splitTextToSize(
+      `Feedback: ${a.feedback || "No feedback"}`,
+      180
+    );
+    doc.text(feedbackLines, 14, y);
+    y += feedbackLines.length * 7 + 8;
+  });
+
+  doc.save(`Final-Interview-Report-${Date.now()}.pdf`);
+}
+
+
+
   async function submitAnswer() {
     try {
       if (!question || !answerText.trim()) {
@@ -699,6 +740,13 @@ setSessionAttempts(updatedAttempts);
           </div>
         ))}
       </div>
+      <button
+  className="ai-btn ai-btn-primary"
+  style={{ marginTop: 20, marginRight: 10 }}
+  onClick={() => downloadFinalReport(finalReport)}
+>
+  Download Final PDF
+</button>
 
       <button
         className="ai-btn ai-btn-primary"
