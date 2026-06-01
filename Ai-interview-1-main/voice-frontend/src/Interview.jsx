@@ -70,6 +70,8 @@ export default function Interview() {
   const [evaluating, setEvaluating] = useState(false);
   const [result, setResult] = useState(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [sessionAttempts, setSessionAttempts] = useState([]);
+const [finalReport, setFinalReport] = useState(null);
 
 const PremiumModal = () => (
   <div className="premium-modal-overlay">
@@ -599,16 +601,48 @@ useEffect(() => {
         throw new Error(saveData.error || "Save failed");
       }
 
+
+      const currentAttempt = {
+  question,
+  answerText,
+  score: Number(evData.score) || 0,
+  feedback: evData.feedback || "",
+  what_was_good: evData.what_was_good || [],
+  what_to_improve: evData.what_to_improve || [],
+};
+
+const updatedAttempts = [...sessionAttempts, currentAttempt];
+setSessionAttempts(updatedAttempts);
+
       const nextIndex = index + 1;
 
-      if (nextIndex < questions.length) {
-        setIndex(nextIndex);
-        setAnswerText("");
-        setResult(null);
-        setUploadedUrl("");
-      } else {
-        alert("✅ Finished!");
-      }
+    if (nextIndex < questions.length) {
+  setIndex(nextIndex);
+  setAnswerText("");
+  setResult(null);
+  setUploadedUrl("");
+} else {
+  const totalScore = updatedAttempts.reduce((sum, a) => sum + a.score, 0);
+  const avgScore = updatedAttempts.length
+    ? (totalScore / updatedAttempts.length).toFixed(1)
+    : 0;
+
+  setFinalReport({
+    totalQuestions: updatedAttempts.length,
+    averageScore: avgScore,
+    attempts: updatedAttempts,
+    status:
+      avgScore >= 8
+        ? "Excellent"
+        : avgScore >= 6
+        ? "Good"
+        : avgScore >= 4
+        ? "Average"
+        : "Needs Improvement",
+  });
+
+  alert("✅ Interview Finished! Final report generated.");
+}
     } catch (e) {
       alert("Error: " + e.message);
     } finally {
@@ -621,6 +655,68 @@ useEffect(() => {
     
     <>
     {showPremiumModal && <PremiumModal />}
+
+
+    {finalReport && (
+  <div className="iv-wrap">
+    <div className="ai-card final-report-card">
+      <h2 className="iv-title">🎯 Final Interview Report</h2>
+
+      <div className="final-score-box">
+        <div>
+          <div className="iv-sub">Overall Score</div>
+          <h1>{finalReport.averageScore}/10</h1>
+        </div>
+
+        <span className="ai-pill">{finalReport.status}</span>
+      </div>
+
+      <div className="final-stats">
+        <div className="final-stat">
+          <strong>{finalReport.totalQuestions}</strong>
+          <span>Total Questions</span>
+        </div>
+
+        <div className="final-stat">
+          <strong>{finalReport.attempts.filter((a) => a.score >= 6).length}</strong>
+          <span>Good Answers</span>
+        </div>
+
+        <div className="final-stat">
+          <strong>{finalReport.attempts.filter((a) => a.score < 6).length}</strong>
+          <span>Need Practice</span>
+        </div>
+      </div>
+
+      <h3 className="iv-title mt-2">Question-wise Performance</h3>
+
+      <div className="final-table">
+        {finalReport.attempts.map((a, i) => (
+          <div className="final-row" key={i}>
+            <div className="final-qno">Q{i + 1}</div>
+            <div className="final-qtext">{a.question}</div>
+            <div className="final-qscore">{a.score}/10</div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        className="ai-btn ai-btn-primary"
+        style={{ marginTop: 20 }}
+        onClick={() => {
+          setFinalReport(null);
+          setIndex(0);
+          setAnswerText("");
+          setSessionAttempts([]);
+          setResult(null);
+        }}
+      >
+        Start New Interview
+      </button>
+    </div>
+  </div>
+)}
+ {!finalReport && (
     <div className="iv-wrap">
       <div className="ai-card">
         <VoicePicker onSelect={setVoiceId} />
@@ -769,6 +865,7 @@ useEffect(() => {
         </div>
       </div>
     </div>
+    )}
      </>
   );
 }

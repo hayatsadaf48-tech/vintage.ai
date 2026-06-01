@@ -216,3 +216,90 @@ button:focus-visible {
   color: #0f172a !important;
   border: 1px solid #cbd5e1;
 }
+
+
+.final-report-card {
+  max-width: 950px;
+  margin: 0 auto;
+  border-radius: 28px;
+  padding: 32px;
+}
+
+.final-score-box {
+  margin-top: 20px;
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #eef2ff, #f8fafc);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.final-score-box h1 {
+  margin: 6px 0 0;
+  font-size: 48px;
+  color: #2563eb;
+}
+
+.final-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.final-stat {
+  padding: 18px;
+  border-radius: 20px;
+  background: #f8fafc;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.final-stat strong {
+  display: block;
+  font-size: 28px;
+  color: #0f172a;
+}
+
+.final-stat span {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.final-table {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.final-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 100px;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.final-qno {
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.final-qtext {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.final-qscore {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: white;
+  padding: 10px;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: 800;
+}
